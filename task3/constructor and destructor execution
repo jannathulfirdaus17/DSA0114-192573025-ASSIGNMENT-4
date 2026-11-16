@@ -1,0 +1,74 @@
+#include <iostream>
+#include <string>
+using namespace std;
+class Address {
+public:
+    Address() { cout << "Address "; }
+    ~Address() { cout << "~Address "; }
+};
+class Course {
+public:
+    Course() { cout << "Course "; }
+    ~Course() { cout << "~Course "; }
+};
+class Person {
+protected:
+    string name;
+    int age;
+    Address address;
+public:
+    Person(string n, int a)
+        : name(n), age(a), address() {
+        cout << "Person ";
+    }
+    ~Person() { cout << "~Person "; }
+};
+class Student : virtual public Person {
+    Course course;
+public:
+    Student(string n, int a)
+        : Person(n, a), course() {
+        cout << "Student ";
+    }
+    ~Student() { cout << "~Student "; }
+};
+
+class Staff : virtual public Person {
+public:
+    Staff(string n, int a)
+        : Person(n, a) {
+        cout << "Staff ";
+    }
+    ~Staff() { cout << "~Staff "; }
+};
+class TeachingAssistant : public Student, public Staff {
+public:
+    TeachingAssistant(string n, int a)
+        : Person(n, a),
+          Student(n, a),
+          Staff(n, a) {
+        cout << "TeachingAssistant ";
+    }
+    ~TeachingAssistant() {
+        cout << "~TeachingAssistant ";
+    }
+};
+int main() {
+    cout << "Student object: ";
+    {
+        Student s("Kavya", 19);
+    }
+    cout << "\n\n";
+
+    cout << "Staff object: ";
+    {
+        Staff st("Arun", 35);
+    }
+    cout << "\n\n";
+    cout << "TeachingAssistant object: ";
+    {
+        TeachingAssistant ta("Ravi", 25);
+    }
+    cout << "\n";
+    return 0;
+}
