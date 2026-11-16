@@ -1,0 +1,29 @@
+class Address {
+    string city;
+    int pin;
+public:
+    Address(string c, int p) : city(c), pin(p) {}
+};
+class Course {
+    string courseName;
+public:
+    Course(string c) : courseName(c) {}
+};
+
+class Person {
+protected:
+    string name;
+    int age;
+    Address address;
+public:
+    Person(string n, int a, string city, int pin)
+        : name(n), age(a), address(city, pin) {}
+};
+class Student : virtual public Person {
+protected:
+    Course course;
+public:
+    Student(string n, int a, string city, int pin,
+            string c)
+        : Person(n, a, city, pin), course(c) {}
+};
