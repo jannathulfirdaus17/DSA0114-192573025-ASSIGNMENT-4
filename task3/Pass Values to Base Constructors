@@ -1,0 +1,30 @@
+class Person {
+protected:
+    string name;
+    int id;
+public:
+    Person(string n, int i) : name(n), id(i) {}
+};
+class Student : virtual public Person {
+protected:
+    string programme;
+public:
+    Student(string n, int i, string p, string prog)
+        : Person(n, i), programme(prog) {}
+};
+class Staff : virtual public Person {
+protected:
+    string department;
+public:
+    Staff(string n, int i, string p, string dept)
+        : Person(n, i), department(dept) {}
+};
+
+class TeachingAssistant : public Student, public Staff {
+public:
+    TeachingAssistant(string n, int i, string p, string prog,
+                      string dept)
+        : Person(n, i),
+          Student(n, i, p, prog),
+          Staff(n, i, p, dept) {}
+};
