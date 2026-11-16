@@ -1,0 +1,182 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+using namespace std;
+const double FUEL_PRICE = 105.0;       // per litre
+const double ELECTRICITY_PRICE = 8.0; // per kWh
+const double LATE_FEE = 200.0;        // per late day
+
+// Abstract base class
+class Vehicle {
+protected:
+    string regNo;
+    double dailyRate;
+    bool rented;
+public:
+    Vehicle(string reg, double rate)
+        : regNo(reg), dailyRate(rate), rented(false) {}
+    virtual double rentalCharge(int days, double usage) const = 0;
+    virtual void display() const {
+        cout << "Registration: " << regNo
+             << ", Daily rate: Rs." << dailyRate
+             << ", Status: " << (rented ? "Rented" : "Available")
+             << endl;
+    }
+    void rent(int days, double usage) {
+        if (rented) {
+            cout << regNo << " is already rented.\n";
+            return;
+        }
+        rented = true;
+        cout << regNo << " rental charge: Rs."
+             << rentalCharge(days, usage) << endl;
+    }
+    void returnVehicle(int daysLate) {
+        if (!rented) {
+            cout << regNo << " was not rented.\n";
+            return;
+        }
+        double lateCharge = daysLate * LATE_FEE;
+        rented = false;
+        cout << regNo << " returned. Late charge: Rs."
+             << lateCharge << endl;
+    }
+    virtual ~Vehicle() {}
+};
+// Bicycle
+class Bicycle : public Vehicle {
+public:
+    Bicycle(string reg, double rate)
+        : Vehicle(reg, rate) {}
+    double rentalCharge(int days, double usage) const override {
+        return dailyRate * days;
+    }
+    void display() const override {
+        cout << "Bicycle - ";
+        Vehicle::display();
+    }
+};
+// Abstract intermediate class
+class MotorVehicle : public Vehicle {
+protected:
+    double fuelOrChargeLevel;
+    string serviceDueDate;
+
+public:
+    MotorVehicle(string reg, double rate,
+                 double level, string date)
+        : Vehicle(reg, rate),
+          fuelOrChargeLevel(level),
+          serviceDueDate(date) {}
+    void display() const override {
+        Vehicle::display();
+        cout << "Fuel/charge level: " << fuelOrChargeLevel
+             << ", Service due: " << serviceDueDate << endl;
+    }
+};
+// Two-wheeler
+class TwoWheeler : public MotorVehicle {
+public:
+    TwoWheeler(string reg, double rate,
+               double fuel, string date)
+        : MotorVehicle(reg, rate, fuel, date) {}
+    double rentalCharge(int days, double litres) const override {
+        return dailyRate * days + litres * FUEL_PRICE;
+    }
+    void display() const override {
+        cout << "Two-wheeler - ";
+        MotorVehicle::display();
+    }
+};
+// Car
+class Car : public MotorVehicle {
+protected:
+    int seatingCapacity;
+public:
+    Car(string reg, double rate, double fuel,
+        string date, int seats)
+        : MotorVehicle(reg, rate, fuel, date),
+          seatingCapacity(seats) {}
+    double rentalCharge(int days, double litres) const override {
+        return dailyRate * days + litres * FUEL_PRICE;
+    }
+    void display() const override {
+        cout << "Car - ";
+        MotorVehicle::display();
+        cout << "Seating capacity: " << seatingCapacity << endl;
+    }
+};
+// Electric car
+class ElectricCar : public Car {
+private:
+    double batteryCapacity;
+public:
+    ElectricCar(string reg, double rate, double charge,
+                string date, int seats, double capacity)
+        : Car(reg, rate, charge, date, seats),
+          batteryCapacity(capacity) {}
+    double rentalCharge(int days, double kWh) const override {
+        return dailyRate * days + kWh * ELECTRICITY_PRICE;
+    }
+
+    void display() const override {
+        cout << "Electric car - ";
+        MotorVehicle::display();
+        cout << "Seating capacity: " << seatingCapacity
+             << ", Battery capacity: " << batteryCapacity
+             << " kWh" << endl;
+    }
+};
+// New vehicle type: added without changing existing classes
+class ElectricBus : public MotorVehicle {
+private:
+    int seatingCapacity;
+    double batteryCapacity;
+public:
+    ElectricBus(string reg, double rate, double charge,
+                string date, int seats, double capacity)
+        : MotorVehicle(reg, rate, charge, date),
+          seatingCapacity(seats),
+          batteryCapacity(capacity) {}
+    double rentalCharge(int days, double kWh) const override {
+        return dailyRate * days + kWh * ELECTRICITY_PRICE;
+    }
+    void display() const override {
+        cout << "Electric bus - ";
+        MotorVehicle::display();
+        cout << "Seating capacity: " << seatingCapacity
+             << ", Battery capacity: " << batteryCapacity
+             << " kWh" << endl;
+    }
+};
+int main() {
+    cout << fixed << setprecision(2);
+    // Array of base-class pointers
+    Vehicle* fleet[5];
+    fleet[0] = new Bicycle("BIKE01", 100);
+    fleet[1] = new TwoWheeler("TW02", 300, 10, "2026-12-01");
+    fleet[2] = new Car("CAR03", 1000, 40, "2026-12-10", 5);
+    fleet[3] = new ElectricCar("EV04", 1500, 80,
+                               "2026-12-15", 5, 100);
+    fleet[4] = new ElectricBus("BUS05", 2500, 150,
+                               "2026-12-20", 30, 250);
+    cout << "=== RENTING VEHICLES ===\n";
+    fleet[0]->rent(2, 0);
+    fleet[1]->rent(2, 2);   // 2 litres
+    fleet[2]->rent(2, 5);   // 5 litres
+    fleet[3]->rent(2, 20);  // 20 kWh
+    fleet[4]->rent(2, 30);  // 30 kWh
+    cout << "\n=== RETURNING VEHICLE ===\n";
+    fleet[3]->returnVehicle(2); // 2 days late
+    cout << "\n=== FLEET DETAILS ===\n";
+    for (int i = 0; i < 5; i++) {
+        fleet[i]->display();
+        cout << endl;
+    }
+
+    // Release dynamically allocated objects
+    for (int i = 0; i < 5; i++) {
+        delete fleet[i];
+    }
+    return 0;
+}
