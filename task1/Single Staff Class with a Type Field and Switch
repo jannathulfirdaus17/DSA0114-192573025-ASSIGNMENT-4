@@ -1,0 +1,20 @@
+class Staff {
+    string name;
+    int id;
+    int type;
+    double basic, research, hours, rate;
+
+public:
+    double pay() {
+        switch (type) {
+            case 1:
+                return basic + basic * 0.42 + research;
+            case 2:
+                return basic + basic * 0.42;
+            case 3:
+                return hours * rate;
+            default:
+                return 0;
+        }
+    }
+};
